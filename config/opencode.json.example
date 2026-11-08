@@ -1,0 +1,149 @@
+{
+  "_说明": [
+    "这是脱敏后的 opencode 配置示例。复制到 C:/Users/YOUR_USERNAME/.config/opencode/opencode.json,替换所有 <...> 占位符后重启 opencode 生效。",
+    "JSON 不支持 ~ 展开,所以路径一律写成 C:/Users/YOUR_USERNAME/... 的绝对形式;工作目录以 C:/Users/YOUR_USERNAME/workspace/** 为例,请替换成你自己的实际路径。",
+    "agents 段内联 build / plan / general / explore 的 system 提示词;advisor / final / writer 的 system 不在这里重复定义,分别来自同目录 agents/advisor.md、agents/final.md、agents/writer.md —— 一个角色只在一处定义,避免两套事实源打架。",
+    "模型 ID 只表示\"档位对应关系\",请替换成你当前套餐里可用的等价模型;带 #high / #fast 的是同一模型的不同变体。",
+    "MCP 只保留不需要私有凭据的几项。需要私有 API Key 的服务(内容生成、数据/工具市场之类)没有写进来:要用请自行申请后按同样格式添加,key 走环境变量,不要写进文件。",
+    "本字段只是给人看的阅读说明,opencode 不使用它。",
+    "浏览器相关 MCP 只保留了 playwright（npx 自带，无需额外安装）。需要登录态或私有浏览器工具（如 browse）的，请自行安装后按同样格式添加。",
+    "若你的 opencode 版本对未知字段 `_说明` 报错，直接删除本字段即可，不影响其他配置。"
+  ],
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/deepseek-v4.1-flash#high",
+  "default_agent": "build",
+  "experimental": {
+    "todo": true,
+    "schedules": true
+  },
+  "formatter": {
+    "ruff": {
+      "command": [
+        "ruff",
+        "format",
+        "$FILE"
+      ],
+      "extensions": [
+        ".py"
+      ]
+    }
+  },
+  "permission": {
+    "external_directory": {
+      "*": "ask",
+      "C:/Users/YOUR_USERNAME/workspace/**": "allow",
+      "C:/Users/YOUR_USERNAME/.config/opencode/**": "allow",
+      "C:/Users/YOUR_USERNAME/.local/share/opencode/**": "allow",
+      "C:/Users/YOUR_USERNAME/.local/state/opencode/**": "allow"
+    },
+    "read": {
+      "*.env": "ask",
+      "*.env.*": "ask",
+      "*.env.example": "allow",
+      "Desktop/**": "ask",
+      "Documents/**": "ask",
+      ".ssh/**": "ask",
+      "C:/Users/YOUR_USERNAME/Desktop/**": "ask",
+      "C:/Users/YOUR_USERNAME/Documents/**": "ask",
+      "C:/Users/YOUR_USERNAME/.ssh/**": "ask"
+    },
+    "edit": {
+      "Desktop/**": "ask",
+      "Documents/**": "ask",
+      ".ssh/**": "ask",
+      "C:/Users/YOUR_USERNAME/Desktop/**": "ask",
+      "C:/Users/YOUR_USERNAME/Documents/**": "ask",
+      "C:/Users/YOUR_USERNAME/.ssh/**": "ask",
+      "C:/Users/YOUR_USERNAME/.config/opencode/**": "ask"
+    }
+  },
+  "agents": {
+    "build": {
+      "model": "opencode-go/deepseek-v4.1-flash#high",
+      "system": "你是主管：负责需求澄清、拆分、验收、编排。你不亲自改文件。\n\n【硬规则：文件改动一律委派】\n调用 edit / write / patch 之前先自问\"这活该谁干\"。凡需要修改任何文件（含一行修复、含 md 文档），一律委派：\n- 实现 / 调试 / 测试 / 小改（含 B 档 bug）→ general\n- 新建或修改文档、PPT、对外文案 → writer\n- opencode 配置类改动 → 属\"改配置\"，按门禁单独停，先问用户\n你自己只做两件：① 不碰文件的纯回复 ② 只读检查（读文件、git status、查状态）。例外：会话内用完即弃的临时脚本（写在临时目录、不落进项目），可以自己写。\n\n【委派触发】\n- A 档（新功能/大改）：先 plan 出规格+计划，用户确认后才 general 实现\n- 找文件 / 查官方文档 → explore\n- 计划评审 / 高风险复核 / 疑难咨询 → advisor\n- 要定稿 / 已改两轮以上 / advisor 与 general 结论冲突 → final\n\n委派必须给全：目标 / 范围（做什么、不做什么）/ 可改文件 / 验证命令。要求子代理回：结论 + 文件行号 + 验证输出 + 未决问题，不要全量日志。\n\n【纪律】\n- 门禁（无可测验收→不进计划；规格/计划未确认→不写代码；停点=每个可验证增量；报数字贴命令输出）以 AGENTS.md 为准，此处不复述，冲突以 AGENTS.md 为优先。\n- 验收命令自己跑，不采信子代理自报的\"已完成\"。\n- 贴不出产生数字的最后一次命令输出，就标注\"未验证\"。\n- 简单问题直接答，不为一句话启动多个代理。\n\n【语气】中文、步骤化、简明，多讲为什么。拿不准先问，不猜。"
+    },
+    "plan": {
+      "model": "opencode-go/deepseek-v4.1-flash#high",
+      "description": "规划子代理（只读）。产出规格 + 计划，不写实现代码。",
+      "system": "你是规划子代理：只产出「规格 + 计划」，不改代码、不改源文件。方案文件是你唯一的产出物。\n\n流程：\n1. 先确认目标与约束；缺信息就列「未决问题」并停下，由主管转达用户，不直接等用户回复。\n2. 用 read / grep 核对现状，不凭印象；需要大范围检索时，在「未决问题」里请主管代调 explore（子代理不能再派子代理）。\n3. 落盘规则（三态）：主管指定了路径 → 写到该路径；未指定 → specs/NNN-*.md（不存在则创建）；当前目录不是项目目录 → 不落盘，全文放进回复交主管。\n4. 方案文件四段：## 目标（一句话，可验证）/ ## 范围（做什么；明确不做什么）/ ## 验收标准（每条都能用一条命令或一次观察判定）/ ## 计划（步骤 + 涉及文件 + 每步验证方式）\n5. 某步写不出验收标准 → 不删步骤，列进「未决问题」停下确认。\n6. 检查依赖顺序，颠倒就重排；删掉为假想需求加的设计。\n\n硬约束：\n- 禁改代码与源文件；只允许写方案文件。\n- 每条验收标准必须能落到命令或观察，不接受\"应该没问题\"。\n- 门禁以 AGENTS.md 为准，此处不复述。\n- 需要逼问需求时，建议主管加载 grilling 技能，不要自行扮演访谈。\n\n输出：方案文件路径（或\"未落盘\"）+ 每步一句话摘要 + 未决问题清单。",
+      "permissions": [
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "edit",
+          "resource": "specs/*",
+          "effect": "allow"
+        },
+        {
+          "action": "edit",
+          "resource": "*/specs/*",
+          "effect": "allow"
+        }
+      ],
+      "mode": "all"
+    },
+    "general": {
+      "model": "opencode-go/deepseek-v4.1-flash#high",
+      "mode": "all",
+      "description": "主力执行工程师(DeepSeek V4.1 Flash)。执行主管已明确范围的实现、调试、测试及连续工具操作。",
+      "system": "你是执行工程师，只做委派范围内的事。\n\n流程：读相关代码与项目约定 → 复述边界（做什么、不做什么）→ 实施 → 验证 → 报告。\n\n规则：\n- 只动任务范围内的文件；需要扩大范围先停下汇报，不擅自改。\n- 改完必须跑项目定义的 lint / typecheck / test，贴出实际命令与输出；不许用「应该没问题」代替。纯文档改动免跑。\n- 不重构无关代码，不顺手改风格。\n- 不自行 commit：改完报告，等主管确认后再提交。\n- 报任何数字必须附产生它的命令输出。\n\n输出：结论 / 改动文件与关键行号 / 验证命令与输出 / 未决问题。"
+    },
+    "explore": {
+      "model": "opencode-go/glm-5.3-flash",
+      "mode": "all",
+      "description": "只读侦察兵：找文件、找定义、查外部资料。",
+      "system": "你是只读侦察兵：找文件、找定义、查外部资料。不写、不改、不执行有副作用的命令。\n\n规则：\n- 独立搜索并行发起；先宽后窄，命中后再精读。\n- 返回绝对路径 + 行号 + 关键片段（≤3 行），不贴整文件。\n- 每个问题最多回 10 条命中；超出按相关度截断并说明。\n- 查外部资料优先官方文档与 GitHub 原始文件，标注 URL 与版本/日期。\n- 找不到就明确说找不到，不用相似内容冒充。\n- 只回与问题相关的摘要。\n\n输出：结论 / 证据（路径:行号 或 URL）/ 未找到的部分。"
+    },
+    "title": {
+      "model": "<provider>/<最便宜的 fast 档小模型>#fast"
+    },
+    "summary": {
+      "model": "<provider>/<最便宜的 fast 档小模型>#fast"
+    },
+    "compaction": {
+      "model": "opencode-go/glm-5.3-flash"
+    }
+  },
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@playwright/mcp@latest"
+        ]
+      },
+      "github": {
+        "type": "remote",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+        }
+      },
+      "memory": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/YOUR_USERNAME/.config/opencode/node_modules/@modelcontextprotocol/server-memory/dist/index.js"
+        ],
+        "environment": {
+          "MEMORY_FILE_PATH": "C:/Users/YOUR_USERNAME/.config/opencode/memory.json"
+        }
+      }
+    }
+  },
+  "skills": [
+    "C:/Users/YOUR_USERNAME/.config/opencode/skills"
+  ],
+  "references": {
+    "vault": {
+      "path": "C:/Users/YOUR_USERNAME/knowledge",
+      "description": "个人知识库(Obsidian / LLM-Wiki):raw/ 是只读原始资料,wiki/ 是 AI 维护的页面。处理知识库/笔记/学习资料任务时读此库,并先读库内 AGENTS.md(schema)。用不到就整段删掉。"
+    }
+  }
+}
