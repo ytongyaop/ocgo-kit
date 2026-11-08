@@ -18,7 +18,7 @@
 | 痛点 | 普遍做法 | 本仓库做法 |
 |---|---|---|
 | 多模型分工要开多家 API | 每家各充一次、各管一个余额 | 一个 Go 订阅全覆盖，角色与模型档位对应关系已给出 |
-| 智能体配置零散 | 抄 prompt 片段，越堆越乱 | 7 个角色 + 9 个流程 + 门禁规则，成体系 |
+| 智能体配置零散 | 抄 prompt 片段，越堆越乱 | 7 个角色 + 8 个流程 + 门禁规则，成体系 |
 | 出问题不知从哪查 | 反复重装、换模型瞎试 | doctor 自检脚本 + 故障树手册 |
 
 ## v1 交付清单
@@ -36,10 +36,10 @@ ocgo-kit/
 ├── docs/06-中国网络环境.md       出境延迟、代理、哪些 MCP 会卡
 ├── docs/07-自查手册.md           故障树
 ├── docs/08-踩过的坑.md           搭建这套配置时踩的坑
-├── config/AGENTS.md              总纲 + 门禁 + 路由（脱敏模板）
+├── config/AGENTS.md              总纲 + 门禁 + 路由 + 模型档位 + 工具分工（脱敏模板）
 ├── config/opencode.json.example  脱敏配置示例
 ├── config/agents/                advisor / final / writer / plan 等
-├── config/workflows/             9 个流程说明书
+├── config/workflows/             8 个流程说明书
 ├── scripts/doctor.mjs            自检：配置完整性 / 模型可用 / 权限冲突 / 记忆膨胀
 ├── scripts/memory-lint.mjs       记忆分层预算检查
 ├── scripts/install.mjs           检测 + 备份 + 合并，不覆盖已有配置
