@@ -1,0 +1,7 @@
+{"type":"entity","name":"state:记忆索引","entityType":"index","observations":["状态：2026-03-12 建立，热层只留这一条索引","边界：只管登记实体与指针，业务细节不进索引","明细：细节写在各实体的明细行，本索引不展开","【user】user:新手园丁｜使用者画像与偏好","【project】project:阳台园艺工具｜工具盘点与借用去向","【tool】tool:剪枝剪｜规格与保养笔记"]}
+{"type":"entity","name":"user:新手园丁","entityType":"user","observations":["状态：2026-03-12 记录，偏好短句与清单","边界：只记使用习惯与偏好，不记真实身份信息","明细：细节随项目实体走，本实体不展开","工具按使用频率摆放，不按品牌或价格排"]}
+{"type":"entity","name":"project:阳台园艺工具","entityType":"project","observations":["状态：2026-03-12 进行中，四个花箱两个吊盆","边界：只管工具清单与借用记录，不含植物养护","明细：借用记录按周记，细节写在项目页","工具分常用 / 备用 / 闲置三档摆放"]}
+{"type":"entity","name":"tool:剪枝剪","entityType":"tool","observations":["状态：2026-03-12 在用，刃口每月磨一次","边界：只记这一把剪的规格与保养，不覆盖其他工具","明细：规格与保养步骤写在工具页，附示意图","用完擦干再收，潮湿季节放一包干燥剂"]}
+{"type":"relation","from":"user:新手园丁","to":"project:阳台园艺工具","relationType":"owns"}
+{"type":"relation","from":"project:阳台园艺工具","to":"tool:剪枝剪","relationType":"uses"}
+{"type":"relation","from":"user:新手园丁","to":"tool:剪枝剪","relationType":"maintains"}
