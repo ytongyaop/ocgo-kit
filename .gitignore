@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.bak
+*.bak-*
+memory.json
+memory.json.*
+.DS_Store
+Thumbs.db
