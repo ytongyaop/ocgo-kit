@@ -36,6 +36,7 @@ ocgo-kit/
 ├── docs/06-中国网络环境.md       出境延迟、代理、哪些 MCP 会卡
 ├── docs/07-自查手册.md           故障树
 ├── docs/08-踩过的坑.md           搭建这套配置时踩的坑
+├── docs/09-推荐技能.md           技能清单与不推荐的理由
 ├── config/AGENTS.md              总纲 + 门禁 + 路由 + 模型档位 + 工具分工（脱敏模板）
 ├── config/opencode.json.example  脱敏配置示例
 ├── config/agents/                advisor / final / writer / plan 等
@@ -43,7 +44,8 @@ ocgo-kit/
 ├── scripts/doctor.mjs            自检：配置完整性 / 模型可用 / 权限冲突 / 记忆膨胀
 ├── scripts/memory-lint.mjs       记忆分层预算检查
 ├── scripts/install.mjs           检测 + 备份 + 合并，不覆盖已有配置
-└── examples/memory.example.json  虚构项目记忆，演示结构
+├── examples/memory.example.json  虚构项目记忆，演示结构
+└── examples/README.md            示例记忆库的字段说明
 ```
 
 ## 明确不做
