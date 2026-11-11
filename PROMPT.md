@@ -46,7 +46,7 @@
 
 第 5 步：一次性提问（把下面清单一次问完，不要一个个追问）
 需要用户提供的值，列成一张清单一次给出，等用户一次填完再动手：
-1. 你的工作目录绝对路径是什么？（用于 opencode.json 里 permission.external_directory 放行；示例写法 C:/Users/YOUR_USERNAME/workspace/**，请换成真实路径）
+1. 你的工作目录绝对路径是什么？（用于 opencode.json 里 permission.external_directory 放行；模板里写作 `{{WORK_ROOT}}`，请换成真实绝对路径）
 2. 你当前套餐里可用的模型 ID 分别是什么？（配置里用的是"档位对应关系"，带 #high / #fast 的是同一模型的不同变体。至少需要：主力模型、评审模型、仲裁模型、只读检索用的轻量模型、标题/摘要用的最快小模型）
 3. 是否要装 memory（可选的多轮记忆 MCP）？（要 / 不要）
 4. 是否已经有 GitHub MCP 需要保留？token 是否已放在环境变量里（只回答"有/没有"，不要把 token 内容发给我）
@@ -74,7 +74,7 @@
 - 先删掉模板里的 "_说明" 字段（它只是给人看的阅读说明，不属于有效配置）。
 - 保留用户原有 opencode.json 里的 "mcp" 和 "permission" 两个键，不要覆盖；只新增模板里存在而用户缺失的部分。
 - agent 只新增缺失的；用户已有同名 agent，保留用户版本，并把差异列出来让用户决定。
-- 模板里的占位符（如 C:/Users/YOUR_USERNAME/...、<provider>/<...>)必须全部替换成第 5 步问到的真实值，写完自查一遍不许残留尖括号占位。
+- 模板里的占位符必须全部替换成第 5 步问到的真实值：`{{...}}` 令牌（`{{USER}}` / `{{CFG_ROOT}}` / `{{WORK_ROOT}}` / `{{KNOWLEDGE_ROOT}}` 等，含义见本文件末尾的对照表），以及 `<provider>` / `<最便宜的 fast 档小模型>` 这类尖括号旧写法。写完自查一遍：不许残留 `{{`，也不许残留尖括号占位。
 - 合并后的完整 JSON 内容必须先原样贴给用户过目，用户明确确认后才写盘。
 - 写盘前确认它是合法 JSON（例如用 `node -e "JSON.parse(require('fs').readFileSync('<路径>','utf8'))"` 校验），报错就修到通过再继续。
 
@@ -100,6 +100,26 @@
 - 全部完成后给一份收尾报告：改了哪些文件（新建 / 合并 / 跳过）、备份在哪、哪些是可选项没装、下一步用户该做什么。
 ```
 
+## 占位符对照表
+
+`config/` 里的 `{{...}}` 是脱敏占位符，装之前按这张表把每个都换成你自己的值（尖括号 `<...>` 的旧写法同理）：
+
+| 占位符 | 出现在哪 | 你要填什么 |
+|---|---|---|
+| `{{CFG_ROOT}}` | `AGENTS.md` 指针约定、记忆加载 | opencode 配置目录的绝对路径，Windows 通常是 `%USERPROFILE%\.config\opencode` |
+| `{{WORK_ROOT}}` | `AGENTS.md` 指针约定、记忆维护、`workflows\` 里的存档路径 | 项目工作仓库根，例如 `<盘符>:\workspace\work\opencode` |
+| `{{WORKSPACE_ROOT}}` | 现场流程里出现的工作区父目录（`scripts/sync.ps1` 会令牌化成它；本仓库现有模板已不直接用） | 上面两层的父目录，例如 `<盘符>:\workspace\work` |
+| `{{KNOWLEDGE_ROOT}}` | `AGENTS.md` 技能与知识库、`workflows\知识库.md` | 知识库根目录，例如 `<盘符>:\workspace\work\knowledge`；没有知识库就删掉相关行 |
+| `{{USER}}` | `AGENTS.md` 用户与沟通、记忆实体名 | 你的系统用户名，或你在记忆里用的用户标识 |
+| `{{MODEL_MAIN}}` | 主力档：默认 / `build` / `plan` / `general` | 能力较强、你用得起的模型 ID |
+| `{{MODEL_ADVISOR}}` | 评审档：`advisor` | 换一家做交叉验证，别和主力同源 |
+| `{{MODEL_FINAL}}` | 仲裁档：`final` | 再换一家，和评审异构；低频调用 |
+| `{{MODEL_CHEAP}}` | 检索档：`explore` / `compaction` | 便宜、额度大的小模型 |
+| `{{MODEL_FAST}}` | 标题摘要档：`title` / `summary` | 最便宜的快速小模型 |
+| `{{MODEL_WRITER}}` | 写作档：`writer` | 中文创作模型 |
+
+> 注意：`config/opencode.json.example` 里的模型 ID 现在是**档位示意值**（`opencode-go/...`），不是占位符；也照上表换成你套餐里的等价模型。模型 ID 迭代快，别锁版本号。
+
 ## 装完你应该看到什么
 
 五条都能自己观察，任一条对不上就回头查：
@@ -107,5 +127,5 @@
 1. `opencode.json` 是合法 JSON，且里面没有 `_说明` 字段、没有尖括号占位符（`<...>` 一处都不剩）；合并前的版本以 `.bak-时间戳` 备份在同一目录。
 2. 重启 opencode 后，能选到 **7 个角色**：build / plan / general / explore / advisor / final / writer。title / summary / compaction 属于隐藏维护代理，不出现是正常现象。
 3. `<配置目录>/AGENTS.md` 已存在，并且里面有「门禁」章节那几条硬规则（无可测验收不进计划、规格/计划未确认不写代码、停点=每个可验证增量、报数字必须贴命令输出）。
-4. `<配置目录>/workflows/` 下有 **8 个 .md 文件**（继续、新项目、功能、计划、验收、收尾、更新知识库、委派）。
+4. `<配置目录>/workflows/` 下有 **9 个 .md 文件**（需求、架构、开发、测试、发布、观察、继续、委派、知识库）。
 5. 重启后开一个新会话，问一句"你受到哪些规则约束"，回答里能提到门禁与角色分工，说明全局规则确实生效了（没生效就检查 AGENTS.md 是否放对目录、是否忘了重启）。

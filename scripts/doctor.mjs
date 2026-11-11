@@ -210,11 +210,18 @@ function describeJsonError(text, err) {
 /* ------------------------------------------------------------------ */
 
 const PLACEHOLDERS = [
-  { token: 'YOUR_USERNAME', hint: '用户名占位符' },
+  { token: 'YOUR_USERNAME', hint: '旧版用户名占位符' },
   { token: '<provider>', hint: '模型 provider 占位符' },
   { token: '<你的', hint: '路径/值占位符' },
   { token: '<最便宜', hint: '模型档位占位符' },
 ];
+
+/**
+ * 令牌占位符：{{USER}} / {{CFG_ROOT}} / {{WORK_ROOT}} / {{KNOWLEDGE_ROOT}} / {{WORKSPACE_ROOT}} / {{MODEL_*}}
+ * 只匹配「双花括号 + 大写字母/下划线」的真令牌，而不是简单看有没有 `{{`：
+ * AGENTS.md 与模板里还有 `{{...}}` 这种说明性写法，按字符找会把它误判成没替换完（永远 FAIL）。
+ */
+const PLACEHOLDER_RE = /\{\{[A-Z_]+\}\}/;
 
 /** 在文件里找占位符，返回 [{file, line, token}] */
 function findPlaceholders(file, label) {
@@ -230,13 +237,16 @@ function findPlaceholders(file, label) {
     for (const { token } of PLACEHOLDERS) {
       if (lineText.includes(token)) hits.push({ file: label, line: i + 1, token });
     }
+    const m = PLACEHOLDER_RE.exec(lineText);
+    if (m) hits.push({ file: label, line: i + 1, token: m[0] });
   });
   return hits;
 }
 
-const WORKFLOW_FILES = ['继续', '新项目', '功能', '计划', '验收', '收尾', '更新知识库', '委派'].map(
+const WORKFLOW_FILES = ['需求', '架构', '开发', '测试', '发布', '观察', '继续', '委派', '知识库'].map(
   (n) => `${n}.md`,
 );
+const WF_TOTAL = WORKFLOW_FILES.length;
 const AGENT_ROLES = ['advisor.md', 'final.md', 'writer.md'];
 
 const GATES = [
@@ -271,7 +281,7 @@ function collectModels(cfgJson) {
 }
 
 function isPlaceholderValue(v) {
-  return /[<>]/.test(v) || v.includes('YOUR_USERNAME');
+  return /[<>]/.test(v) || v.includes('YOUR_USERNAME') || PLACEHOLDER_RE.test(v);
 }
 
 /* ------------------------------------------------------------------ */
@@ -428,20 +438,20 @@ function run(configDirRaw) {
     wfListText = 'workflows 目录不存在';
   }
   if (missingWf.length === 0) {
-    row('PASS', 'workflows', '8 个流程文件', `8/8 都在（${presentWf.join('、')}）`);
+    row('PASS', 'workflows', `${WF_TOTAL} 个流程文件`, `${WF_TOTAL}/${WF_TOTAL} 都在（${presentWf.join('、')}）`);
   } else if (presentWf.length === 0) {
     row(
       'FAIL',
       'workflows',
-      '8 个流程文件',
-      `0/8，全缺（${wfListText}）→ 把仓库 config/workflows/*.md 整个复制到 ${wfDir}`,
+      `${WF_TOTAL} 个流程文件`,
+      `0/${WF_TOTAL}，全缺（${wfListText}）→ 把仓库 config/workflows/*.md 整个复制到 ${wfDir}`,
     );
   } else {
     row(
       'WARN',
       'workflows',
-      '8 个流程文件',
-      `${presentWf.length}/8，缺 ${missingWf.length} 个：${missingWf.join('、')}（${wfListText}）→ 补上缺的流程 md`,
+      `${WF_TOTAL} 个流程文件`,
+      `${presentWf.length}/${WF_TOTAL}，缺 ${missingWf.length} 个：${missingWf.join('、')}（${wfListText}）→ 补上缺的流程 md`,
     );
   }
 

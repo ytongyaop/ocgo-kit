@@ -1,7 +1,7 @@
 {
   "_说明": [
-    "这是脱敏后的 opencode 配置示例。复制到 C:/Users/YOUR_USERNAME/.config/opencode/opencode.json,替换所有 <...> 占位符后重启 opencode 生效。",
-    "JSON 不支持 ~ 展开,所以路径一律写成 C:/Users/YOUR_USERNAME/... 的绝对形式;工作目录以 C:/Users/YOUR_USERNAME/workspace/** 为例,请替换成你自己的实际路径。",
+    "这是脱敏后的 opencode 配置示例。复制到 {{CFG_ROOT}}/opencode.json,把全部双花括号占位符换成真实值后重启 opencode 生效。",
+    "JSON 不支持 ~ 展开,所以路径一律写成绝对形式:配置目录用 {{CFG_ROOT}},工作仓库用 {{WORK_ROOT}},知识库用 {{KNOWLEDGE_ROOT}},用户主目录下的其他位置写成 C:/Users/{{USER}}/... 。每个占位符要填什么,以仓库根 PROMPT.md 的「占位符对照表」为准。",
     "agents 段内联 build / plan / general / explore 的 system 提示词;advisor / final / writer 的 system 不在这里重复定义,分别来自同目录 agents/advisor.md、agents/final.md、agents/writer.md —— 一个角色只在一处定义,避免两套事实源打架。",
     "模型 ID 只表示\"档位对应关系\",请替换成你当前套餐里可用的等价模型;带 #high / #fast 的是同一模型的不同变体。",
     "MCP 只保留不需要私有凭据的几项。需要私有 API Key 的服务(内容生成、数据/工具市场之类)没有写进来:要用请自行申请后按同样格式添加,key 走环境变量,不要写进文件。",
@@ -31,10 +31,10 @@
   "permission": {
     "external_directory": {
       "*": "ask",
-      "C:/Users/YOUR_USERNAME/workspace/**": "allow",
-      "C:/Users/YOUR_USERNAME/.config/opencode/**": "allow",
-      "C:/Users/YOUR_USERNAME/.local/share/opencode/**": "allow",
-      "C:/Users/YOUR_USERNAME/.local/state/opencode/**": "allow"
+      "{{WORK_ROOT}}/**": "allow",
+      "{{CFG_ROOT}}/**": "allow",
+      "C:/Users/{{USER}}/.local/share/opencode/**": "allow",
+      "C:/Users/{{USER}}/.local/state/opencode/**": "allow"
     },
     "read": {
       "*.env": "ask",
@@ -43,18 +43,18 @@
       "Desktop/**": "ask",
       "Documents/**": "ask",
       ".ssh/**": "ask",
-      "C:/Users/YOUR_USERNAME/Desktop/**": "ask",
-      "C:/Users/YOUR_USERNAME/Documents/**": "ask",
-      "C:/Users/YOUR_USERNAME/.ssh/**": "ask"
+      "C:/Users/{{USER}}/Desktop/**": "ask",
+      "C:/Users/{{USER}}/Documents/**": "ask",
+      "C:/Users/{{USER}}/.ssh/**": "ask"
     },
     "edit": {
       "Desktop/**": "ask",
       "Documents/**": "ask",
       ".ssh/**": "ask",
-      "C:/Users/YOUR_USERNAME/Desktop/**": "ask",
-      "C:/Users/YOUR_USERNAME/Documents/**": "ask",
-      "C:/Users/YOUR_USERNAME/.ssh/**": "ask",
-      "C:/Users/YOUR_USERNAME/.config/opencode/**": "ask"
+      "C:/Users/{{USER}}/Desktop/**": "ask",
+      "C:/Users/{{USER}}/Documents/**": "ask",
+      "C:/Users/{{USER}}/.ssh/**": "ask",
+      "{{CFG_ROOT}}/**": "ask"
     }
   },
   "agents": {
@@ -129,20 +129,20 @@
         "type": "local",
         "command": [
           "node",
-          "C:/Users/YOUR_USERNAME/.config/opencode/node_modules/@modelcontextprotocol/server-memory/dist/index.js"
+          "{{CFG_ROOT}}/node_modules/@modelcontextprotocol/server-memory/dist/index.js"
         ],
         "environment": {
-          "MEMORY_FILE_PATH": "C:/Users/YOUR_USERNAME/.config/opencode/memory.json"
+          "MEMORY_FILE_PATH": "{{CFG_ROOT}}/memory.json"
         }
       }
     }
   },
   "skills": [
-    "C:/Users/YOUR_USERNAME/.config/opencode/skills"
+    "{{CFG_ROOT}}/skills"
   ],
   "references": {
     "vault": {
-      "path": "C:/Users/YOUR_USERNAME/knowledge",
+      "path": "{{KNOWLEDGE_ROOT}}",
       "description": "个人知识库(Obsidian / LLM-Wiki):raw/ 是只读原始资料,wiki/ 是 AI 维护的页面。处理知识库/笔记/学习资料任务时读此库,并先读库内 AGENTS.md(schema)。用不到就整段删掉。"
     }
   }
