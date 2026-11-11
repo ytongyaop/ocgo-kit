@@ -1,0 +1,16 @@
+# Dependabot 配置
+#
+# 本仓库没有第三方运行时依赖：scripts/ 下的脚本只用 Node 内置模块
+# （node:fs / node:path / node:os / node:process / node:url / node:crypto），
+# 没有 package.json，也没有 npm 依赖。
+# 因此这里只跟进 GitHub Actions 的版本更新，每月检查一次。
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
