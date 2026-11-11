@@ -1,0 +1,53 @@
+name: 提议改进
+description: 提出流程、规则或默认值上的取舍意见
+title: "[改进] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这里要的是"问题"，不是"功能清单"。本仓库是配置仓库，加一条规则等于给所有使用者加一条约束，所以先讲清楚你想解决什么。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 描述你实际遇到的场景和卡点。不要说"希望能支持 X"，说"做 Y 的时候，因为 Z，我卡住了/来回折腾了三次"。
+      placeholder: |
+        每次小改动都要走完整的开发流程，改一行错别字也要拆增量、跑验收。
+        结果是：我干脆不走流程直接对话，反而绕过了门禁该保护的东西。
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 你现在的做法
+      description: 你现在怎么绕过去的（改配置、加规则、干脆不用某个流程）。这能说明问题有多真实。
+      placeholder: |
+        我把 config/workflows/开发.md 里的 B 档条件放宽成"改动小于 3 个文件"，手工改在本机。
+        下次同步仓库时这段就丢了，得再改一遍。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 你考虑过的替代方案
+      description: |
+        至少写一个"不这么做"的方案，以及你为什么否掉它。
+        比如：与其新增一个流程，不如在现有流程里加一个分支？与其改默认值，不如在文档里写明"按需自行修改"？
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pr
+    attributes:
+      label: 是否愿意提 PR
+      description: 不是承诺。只是想先知道这个改动要谁来落地。
+      options:
+        - 愿意，我可以自己改并跑验证命令
+        - 只想提想法，改动麻烦维护者来
+        - 不确定，想先讨论方向
+    validations:
+      required: false

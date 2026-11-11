@@ -4,6 +4,8 @@
 > 纯文本配置，不是插件：几个 `.md` 加一份 JSON 示例，每一行都可读、可删、可改。
 > 和 oh-my-opencode 不是竞品，是两条路：那边给省心，这边给透明。
 
+> **English**: A plain-text OpenCode workflow kit — 7 agents, 9 staged workflows, 4 hard gates, and self-check scripts. Built around a single OpenCode Go subscription, no second API key required. Documentation is in Chinese.
+
 ## 目录
 
 - [这是什么](#这是什么)
@@ -19,6 +21,7 @@
 - [局限](#局限)
 - [文档](#文档)
 - [维护](#维护)
+- [参与](#参与)
 
 ## 这是什么
 
@@ -152,3 +155,9 @@ Go 套餐内养起来的档位对应关系：
 本仓库由个人维护，不承诺与 oh-my-opencode 功能对等，也不承诺长期支持。
 
 这套配置会随 opencode 版本和模型迭代继续更新；版本变化导致配置失效时，优先保证 README 和安装文档可执行。欢迎提 issue 报告具体报错，但不保证修复。
+
+## 参与
+
+- [更新日志](CHANGELOG.md)——每个版本改了什么、动了哪些默认行为（语义化版本 + Keep a Changelog）。
+- [参与改进](CONTRIBUTING.md)——本仓库最有用的贡献是什么、提交前必须跑哪些命令、改配置的硬规矩。
+- [安全策略](SECURITY.md)——这个仓库的安全边界、怎么私下报告问题、以及使用者装配置时最容易踩的坑。

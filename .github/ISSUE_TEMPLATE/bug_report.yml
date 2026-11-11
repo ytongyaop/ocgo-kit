@@ -1,0 +1,96 @@
+name: 报告问题
+description: 报告配置装不上、脚本跑不通，或文档与实际行为不一致
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        开这个表之前，先做两件事：
+
+        1. 跑 `node scripts/doctor.mjs`，把结果留在手上（下面要填）。
+        2. 对照 `docs/07-自查手册.md` 的症状表看一遍，很多问题那里面已经有答案。
+
+        注意：对仓库自己的 `config/` 目录跑 `doctor.mjs` 会固定出现 1 个 FAIL（占位符残留），这是预期结果。请贴**装到你本机之后**的输出。
+
+  - type: textarea
+    id: what-did
+    attributes:
+      label: 你做了什么
+      description: 按顺序写清步骤，能让人照着复现。包括用的哪种装法（让 AI 装 / install.mjs / 手动抄）。
+      placeholder: |
+        1. 克隆仓库到本地
+        2. 执行 node scripts/install.mjs --apply
+        3. 手工合并 opencode.json，把 {{MODEL_MAIN}} 换成了 xxx
+        4. 重启 opencode
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+      description: 你按文档做，以为会发生什么。
+      placeholder: 会话选择器里出现 7 个角色。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 真正发生了什么。有报错的，把错误原文贴全，不要只贴一句话。
+      placeholder: |
+        只看到 build，另外 6 个角色一个都没有。
+        启动时的报错原文：
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 三样都要，缺一样基本没法定位。
+      value: |
+        操作系统：
+        opencode 版本（`opencode --version`）：
+        Node 版本（`node --version`）：
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: doctor.mjs 输出
+      description: |
+        贴 `node scripts/doctor.mjs` 的完整输出（表格模式原文即可，或 `--json` 的结果）。
+        **贴之前把个人路径打码**：把 `/Users/你的名字`、`C:\Users\你的名字` 这类换成 `<我>`。用户名、项目名、公司名都不要留。
+        太长的话，至少保留末尾的 `--- 汇总: PASS=n WARN=n FAIL=n ---` 那一行和所有 FAIL 行。
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: config-snippet
+    attributes:
+      label: 相关配置片段（可选）
+      description: |
+        只贴出问题的那一段，不要整份配置。
+        **不要贴 token、key、密码、cookie**。真要用到凭据的地方，请留变量名（如 `GITHUB_PERSONAL_ACCESS_TOKEN`），把值删掉。
+      render: json
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我确认上面没有粘贴真实姓名、真实路径、项目名或 token。
+          required: true
+        - label: 我确认这不是对仓库模板目录跑 doctor 得到的"固定 1 个 FAIL"。
+          required: true
+        - label: 我确认已经重启过 opencode 再测的（配置只在启动时读一次）。
+          required: true
