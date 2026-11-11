@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 语法检查
+        run: |
+          node --check scripts/doctor.mjs
+          node --check scripts/install.mjs
+          node --check scripts/memory-lint.mjs
+      - name: JSON 模板合法
+        run: node -e "JSON.parse(require('fs').readFileSync('config/opencode.json.example','utf8'));console.log('JSON OK')"
+      - name: 记忆库示例通过 lint
+        run: node scripts/memory-lint.mjs --memory examples/memory.example.json
+      - name: 流程文件数量与四键
+        run: |
+          node -e "
+          const fs = require('fs');
+          const dir = 'config/workflows';
+          const keys = ['触发:', '不触发:', '前置产物:', '产出物:'];
+          const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
+          let bad = false;
+          if (files.length !== 9) {
+            console.log('FAIL 流程文件数量=' + files.length + '，期望 9');
+            bad = true;
+          }
+          for (const f of files) {
+            const text = fs.readFileSync(dir + '/' + f, 'utf8');
+            const missing = keys.filter((k) => !text.includes(k));
+            if (missing.length) {
+              console.log('FAIL ' + f + ' 缺少 ' + missing.join(' '));
+              bad = true;
+            }
+          }
+          console.log(bad ? '流程校验未通过' : '流程校验通过：' + files.length + ' 个文件，四键齐全');
+          process.exit(bad ? 1 : 0);
+          "
+      - name: install dry-run 不写盘
+        run: |
+          rm -rf /tmp/target && mkdir -p /tmp/target
+          node scripts/install.mjs --config-dir /tmp/target
+          test -z "$(ls -A /tmp/target)" || (echo 'dry-run 写了文件!'; exit 1)
+      - name: doctor 对模板（期望恰好 1 个 FAIL）
+        run: |
+          set +e
+          out=$(node scripts/doctor.mjs --config-dir config)
+          code=$?
+          printf '%s\n' "$out"
+          fails=$(printf '%s\n' "$out" | grep -c '^FAIL' || true)
+          echo "exit=$code fails=$fails"
+          test "$code" = "1" || exit 1
+          test "$fails" = "1" || exit 1
